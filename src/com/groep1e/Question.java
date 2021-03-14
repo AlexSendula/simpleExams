@@ -3,28 +3,41 @@ package com.groep1e;
 import java.util.ArrayList;
 
 public class Question {
-    private String vraag;
-    private String antwoord;
-    private static ArrayList<Question> questionslist = new ArrayList<Question>();
+    private String question;
+    private String answer;
+    private static ArrayList<Question> questionList = new ArrayList<>();
 
-    public Question(String vraag, String antwoord) {
-        this.vraag = vraag;
-        this.antwoord = antwoord;
+    public Question(String question, String answer) {
+        this.question = question;
+        this.answer = answer;
     }
 
-    public String getVraag() {
-        return vraag;
+    public String getQuestion() {
+        return question;
     }
 
-    public String getAntwoord() {
-        return antwoord;
+    public void setQuestion(String question) {
+        this.question = question;
     }
 
-    public static ArrayList<Question> getQuestionslist() {
-        return questionslist;
+    public String getAnswer() {
+        return answer;
+    }
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
+
+    public static ArrayList<Question> getQuestionList() {
+        return questionList;
     }
 
     public static void addQuestion(Question question) {
-        questionslist.add(question);
+        questionList.add(question);
     }
+
+    public static void resetQuestonList() {
+        questionList = new ArrayList<>();
+    }
+
 }

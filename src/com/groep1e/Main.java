@@ -1,87 +1,141 @@
 package com.groep1e;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
+    private static final String examPath = "../simpleExams/src/com/groep1e/Exams/";
+
     public static void main(String[] args) {
 
-        MenuData();
+        initializeExams();
 
+        Student Alex = new Student("Alex", "12345678");
+        Student Dylan = new Student("Dylan", "23456789");
+        Student Emre = new Student("Emre", "34567891");
+
+        Student.addStudent(Alex);
+        Student.addStudent(Dylan);
+        Student.addStudent(Emre);
+
+        MenuData();
     }
 
     public static void MenuData() {
 
         System.out.printf("\n");
-        System.out.println("1) Lijst met examens");
-        System.out.println("2) Lijst met studenten");
-        System.out.println("3) Nieuwe student inschrijven");
-        System.out.println("4) Student verwijderen");
-        System.out.println("5) Examen afnemen");
-        System.out.println("6) Welke examens heeft student gehaald?");
-        System.out.println("7) Welke student heeft de meeste examens gehaald?");
+        System.out.println("1) List of exams");
+        System.out.println("2) List of students");
+        System.out.println("3) Create new student");
+        System.out.println("4) Delete student");
+        System.out.println("5) Take exam");
+        System.out.println("6) Exams completed by student");
+        System.out.println("7) Top scoring student");
+        System.out.println("8) Create new exams");
+        System.out.println("9) Delete exams");
         System.out.println("0) Exit");
-        System.out.println("Uw keuze: ");
+        System.out.println("Please choose: ");
 
-        Scanner scanner = new Scanner(System.in);
-        int selection = scanner.nextInt();
+        int selection;
 
-        if (selection >= 0 && selection <= 8) {
+        try {
+            Scanner scanner = new Scanner(System.in);
+            selection = scanner.nextInt();
+        } catch (Exception e) {
+            clearScrean();
+            MenuData();
+            return;
+        }
+
+        if (selection >= 0 && selection <= 9) {
             switch (selection) {
                 case 0:
+                    clearScrean();
                     closeApplication();
                     break;
                 case 1:
+                    clearScrean();
                     listExams();
                     break;
                 case 2:
-                    allStudents();
+                    clearScrean();
+                    listStudents();
                     break;
                 case 3:
+                    clearScrean();
                     createStudent();
                     break;
                 case 4:
+                    clearScrean();
                     removeStudent();
                     break;
                 case 5:
-                    startExam();
+                    clearScrean();
+                    takeExam();
                     break;
                 case 6:
-                    examensBehaald();
+                    clearScrean();
+                    studentCompletedExams();
                     break;
                 case 7:
-                    System.out.println(Student.meestBehaaldeExamens().getNaam());
+                    clearScrean();
+                    topScoringStudent();
+                    break;
+                case 8:
+                    clearScrean();
+                    createExams();
+                    break;
+                case 9:
+                    clearScrean();
+                    deleteExams();
                     break;
             }
+        } else {
+            clearScrean();
+            MenuData();
         }
     }
 
     public static void closeApplication() {
+        System.out.println("Thank you for trying out my program! - Alexandar Sendula");
         System.exit(0);
+    }
+
+    public static void listExams() {
+        for (Exam exam : Exam.getExamList()) {
+            System.out.println(exam.getNameShort());
+        }
+
+        MenuData();
     }
 
     public static void createStudent() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Naam:");
-        String naam = scanner.nextLine();
-        System.out.println("Studentnummer:");
-        int studentNummer = scanner.nextInt();
+        System.out.println("Name, StudentId");
+        String[] input = scanner.nextLine().split(", ");
 
-        Student student = new Student(naam, studentNummer);
+        if (Student.isStudentIdValid(input[1], false)) {
+            Student student = new Student(input[0], input[1]);
 
-        Student.addStudent(student);
-        System.out.printf("Student %s is aangemaakt \n", student.getNaam());
+            Student.addStudent(student);
+            System.out.printf("Student %s has been created.\n", student.getName());
+        } else {
+            System.out.println("Invalid student id, please try again.");
+        }
 
         MenuData();
-
     }
 
-    public static void allStudents() {
+    public static void listStudents() {
         for(Student student : Student.getStudentList()) {
-            System.out.printf("%s, %d\n", student.getNaam(), student.getStudentNummer());
+            System.out.printf("%s, %s\n", student.getName(), student.getStudentNummer());
         }
 
         MenuData();
@@ -90,98 +144,221 @@ public class Main {
     public static void removeStudent() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Studentnummer:");
-        Student.removeStudent(scanner.nextInt());
-        System.out.println("Student is verwijderd");
+        System.out.println("Please provide a valid student id.");
+        Student.removeStudent(scanner.nextLine());
+        System.out.println("Student has been deleted.");
 
         MenuData();
     }
 
-    public static void examensBehaald() {
+    public static void takeExam()  {
         Scanner scanner = new Scanner(System.in);
+        System.out.println("What is your student id?");
+        String studentId = scanner.nextLine();
+        Student student;
 
-        System.out.println("Studentnummer:");
-        Student student = Student.getStudentById(scanner.nextInt());
-        ArrayList<String> behaaldeExamens = student.getBehaaldeExamens();
-        System.out.printf("%s heeft de volgende examens behaald:\n", student.getNaam());
-        for (String examen : behaaldeExamens) {
-            System.out.println(examen);
-        }
-        System.out.println("\n");
-        MenuData();
-    }
-
-    public static void listExams() {
-        File folder = new File("../simpleExams/src/com/groep1e/Exams");
-        for (File f : folder.listFiles()) {
-            System.out.println(f.getName());
+        if (Student.isStudentIdValid(studentId, true)) {
+            student = Student.getStudentById(studentId);
+        } else {
+            System.out.println("Invalid student id, please try again.");
+            MenuData();
+            return;
         }
 
-        MenuData();
-    }
-
-    public static void startExam() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Wat is je studentnummer?");
-        Student student = Student.getStudentById(scanner.nextInt());
-        scanner.nextLine();
-
-        System.out.println("Welke examen wilt u afnemen?");
-        File folder = new File("../simpleExams/src/com/groep1e/Exams");
-        for (File f : folder.listFiles()) {
-            System.out.println(f.getName());
+        System.out.println("Please select an exam.");
+        for (Exam exam : Exam.getExamList()) {
+            System.out.println(exam.getNameShort());
         }
 
         try {
-            String gekozenExamen = scanner.nextLine();
-            createQuestions(gekozenExamen);
-            int fouten = 0;
+            String selection = scanner.nextLine() + ".txt";
+            Exam exam = Exam.getExam(selection);
+            int totalCorrect = 0;
+            clearScrean();
 
-            for (Question question : Question.getQuestionslist()) {
-                System.out.println(question.getVraag());
-                if (scanner.next().equals(question.getAntwoord())) {
-                    System.out.println("Goed!");
+            for (Question question : Exam.getShuffledExam(exam)) {
+                System.out.println(question.getQuestion());
+                String userInput = scanner.nextLine();
+                if (userInput.equalsIgnoreCase(question.getAnswer())) {
+                    clearScrean();
+                    System.out.println("Correct!");
+                    totalCorrect++;
                 } else {
-                    System.out.println("Fout!");
-                    fouten++;
+                    clearScrean();
+                    System.out.printf("Question: %s\nYour answer: %s\n", question.getQuestion(), userInput);
+                    System.out.printf("Incorrect! The right answer should be: %s\n", question.getAnswer());
                 }
             }
 
-            if (fouten > 0) {
-                System.out.printf("Je hebt het examen niet gehaald, aantal fout: %d", fouten);
+            clearScrean();
+            double score = (100.00 / Exam.getShuffledExam(exam).size()) * totalCorrect;
+            if (score >= Double.parseDouble(exam.getDifficulty())) {
+                student.addCompletedExam(exam);
+                System.out.println("Congratulations! You have completed the exam.");
             } else {
-                student.examenBehaald(gekozenExamen);
-                System.out.println("Je hebt het examen behaald!");
+                System.out.println("You have failed the exam, please try again.");
             }
-
-            System.out.printf("Het examen is afgerond, je hebt %d fout!\n", fouten);
-            MenuData();
 
         } catch (Exception e) {
-            System.out.println("Probeer het opnieuw");
+            clearScrean();
+            System.out.println("Invalid exam, please try again.");
         }
-
         MenuData();
-
     }
 
-    public static void createQuestions(String exam) throws FileNotFoundException {
-        Scanner scanner = new Scanner(new File("../simpleExams/src/com/groep1e/Exams/" + exam));
+    public static void studentCompletedExams() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Please provide a valid student id.");
+        Student student = Student.getStudentById(scanner.nextLine());
+        clearScrean();
+
+        if (student.getCompletedExams().size() == 0) {
+            System.out.printf("%s has not yet completed any exams.\n", student.getName());
+        } else {
+            System.out.printf("%s has completed the following exams:\n", student.getName());
+            for (Exam exam : student.getCompletedExams()) {
+                System.out.println(exam.getNameShort());
+            }
+        }
+        MenuData();
+    }
+
+    public static void topScoringStudent() {
+        Student student = Student.getTopScoringStudent();
+
+        if (student == null) {
+            System.out.println("No exams have been completed so far.");
+        } else {
+            System.out.printf("%s has completed most exams. Number of exams completed: %s\n", student.getName(), student.getCompletedExams().size());
+        }
+        MenuData();
+    }
+
+    public static void  createExams() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Please enter a name.");
+        String examName = scanner.nextLine() + ".txt";
+        System.out.println("Please confirm.");
+        if (!examName.equals(scanner.nextLine() + ".txt")) {
+            MenuData();
+            return;
+        }
+
+        File file = new File(examPath + examName);
+        try {
+            if (!file.createNewFile()) {
+                System.out.println("This exam already exists, please try again.");
+                clearScrean();
+                MenuData();
+            }
+
+            FileWriter writer = new FileWriter(examPath + examName);
+
+            System.out.println("What is the difficulty? (e.g. 62.5)");
+            String difficulty = scanner.nextLine();
+            writer.write(difficulty + ",");
+            System.out.println("How many questions will the exam have?");
+            String examLength = scanner.nextLine();
+            writer.write(examLength + ",");
+
+            Question.resetQuestonList();
+
+            for (int i = 0; i < Integer.parseInt(examLength); i++) {
+                System.out.printf("Question %d)\n", i+1);
+                String question = scanner.nextLine();
+                writer.write(question + ",");
+                System.out.printf("Answer %d)\n", i+1);
+                String answer = scanner.nextLine();
+                writer.write(answer + ",");
+
+                Question newQuestion = new Question(question, answer);
+                Question.addQuestion(newQuestion);
+            }
+
+            Exam.addExam(new Exam(examName, difficulty, examLength, Question.getQuestionList()));
+
+            writer.close();
+            clearScrean();
+            System.out.println("Exam succesfully created!");
+            MenuData();
+        } catch (Exception e) {
+            clearScrean();
+            System.out.println(e);
+            MenuData();
+        }
+    }
+
+    public static void deleteExams() {
+        Scanner scanner = new Scanner(System.in);
+
+        for (Exam exam : Exam.getExamList()) {
+            System.out.println(exam.getNameShort());
+        }
+        System.out.println("Which exam would you like to delete?.");
+        String examName = scanner.nextLine();
+        if (Exam.getExam(examName + ".txt") == null) {
+            clearScrean();
+            System.out.println("Exam does not exist, please try again.");
+            MenuData();
+            return;
+        }
+
+        Exam exam = Exam.getExam(examName + ".txt");
+
+        try {
+            File file = new File("com/groep1e/Exams/test.txt");
+
+            if (file.delete()) { // PROBLEM: file.delete() IS NOT DELETING FILES!!!!
+                clearScrean();
+                System.out.printf("%s has been deleted", examName);
+                MenuData();
+            } else {
+                clearScrean();
+                System.out.println("error");
+                MenuData();
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            clearScrean();
+            MenuData();
+        }
+    }
+
+    public static void initializeExams() {
+        try {
+            File folder = new File(examPath);
+            for (File f : folder.listFiles()) {
+                Scanner scanner = new Scanner(new File(examPath + f.getName()));
+                scanner.useDelimiter(",");
+                String difficulty = scanner.next();
+                String examLength = scanner.next();
+
+                Exam.addExam(new Exam(f.getName(), difficulty, examLength, initializeQuestions(f.getName())));
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public static ArrayList<Question> initializeQuestions(String examName) throws FileNotFoundException {
+        Scanner scanner = new Scanner(new File(examPath + examName));
         scanner.useDelimiter(",");
-        int i = 0;
-        String vraag = null;
-        String antwoord = null;
-        while (scanner.hasNext()) {
-            if (i == 0) {
-                vraag = scanner.next();
-                i++;
-            }
-            if(i == 1) {
-                antwoord = scanner.next();
-                i--;
-            }
-            Question question = new Question(vraag, antwoord);
-            Question.addQuestion(question);
+        Question.resetQuestonList();
+        scanner.nextLine();
+        while (scanner.hasNext() || scanner.hasNextInt()) {
+            String question = scanner.next();
+            String answer = scanner.next();
+
+            Question newQuestion = new Question(question, answer);
+            Question.addQuestion(newQuestion);
+
+        }
+        return Question.getQuestionList();
+    }
+
+    public static void clearScrean() {
+        for (int i = 0; i < 10; i++) {
+            System.out.println("\n");
         }
     }
 }
