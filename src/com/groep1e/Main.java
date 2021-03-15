@@ -18,14 +18,6 @@ public class Main {
         initializeStudents();
         initializeExams();
 
-//        Student Alex = new Student("Alex", "12345678");
-//        Student Dylan = new Student("Dylan", "23456789");
-//        Student Emre = new Student("Emre", "34567891");
-//
-//        Student.addStudent(Alex);
-//        Student.addStudent(Dylan);
-//        Student.addStudent(Emre);
-
         MenuData();
     }
 
@@ -324,7 +316,7 @@ public class Main {
             clearScrean();
             MenuData();
         }
-    } // Delete not working
+    }
 
     public static void storeStudents() {
         try {
