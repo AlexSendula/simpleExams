@@ -3,6 +3,9 @@ package com.groep1e;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
 import com.google.gson.Gson;
@@ -306,9 +309,8 @@ public class Main {
         Exam exam = Exam.getExam(examName + ".txt");
 
         try {
-            File file = new File("com/groep1e/Exams/test.txt");
-
-            if (file.delete()) { // PROBLEM: file.delete() IS NOT DELETING FILES!!!!
+            System.gc();
+            if (Files.deleteIfExists(Paths.get("../simpleExams/src/com/groep1e//Exams/test.txt"))) {
                 clearScrean();
                 System.out.printf("%s has been deleted", examName);
                 MenuData();
@@ -387,8 +389,8 @@ public class Main {
 
             Question newQuestion = new Question(question, answer);
             Question.addQuestion(newQuestion);
-
         }
+        scanner.close();
         return Question.getQuestionList();
     }
 
