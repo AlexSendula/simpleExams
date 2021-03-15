@@ -1,28 +1,27 @@
 package com.groep1e;
 
-import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
-import java.sql.SQLOutput;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
+import com.google.gson.Gson;
 
 public class Main {
     private static final String examPath = "../simpleExams/src/com/groep1e/Exams/";
 
     public static void main(String[] args) {
 
+        initializeStudents();
         initializeExams();
 
-        Student Alex = new Student("Alex", "12345678");
-        Student Dylan = new Student("Dylan", "23456789");
-        Student Emre = new Student("Emre", "34567891");
-
-        Student.addStudent(Alex);
-        Student.addStudent(Dylan);
-        Student.addStudent(Emre);
+//        Student Alex = new Student("Alex", "12345678");
+//        Student Dylan = new Student("Dylan", "23456789");
+//        Student Emre = new Student("Emre", "34567891");
+//
+//        Student.addStudent(Alex);
+//        Student.addStudent(Dylan);
+//        Student.addStudent(Emre);
 
         MenuData();
     }
@@ -104,6 +103,7 @@ public class Main {
 
     public static void closeApplication() {
         System.out.println("Thank you for trying out my program! - Alexandar Sendula");
+        storeStudents();
         System.exit(0);
     }
 
@@ -216,8 +216,8 @@ public class Main {
             System.out.printf("%s has not yet completed any exams.\n", student.getName());
         } else {
             System.out.printf("%s has completed the following exams:\n", student.getName());
-            for (Exam exam : student.getCompletedExams()) {
-                System.out.println(exam.getNameShort());
+            for (String exam : student.getCompletedExams()) {
+                System.out.println(exam);
             }
         }
         MenuData();
@@ -321,6 +321,42 @@ public class Main {
             System.out.println(e);
             clearScrean();
             MenuData();
+        }
+    } // Delete not working
+
+    public static void storeStudents() {
+        try {
+            File file = new File("../simpleExams/src/com/groep1e/students.txt");
+            if (!file.delete() && !file.createNewFile()) {
+                System.out.println("ERROR: Data could not be stored.");
+            }
+
+            FileWriter writer = new FileWriter(file.getAbsolutePath());
+
+            for (Student student : Student.getStudentList()) {
+                 Gson gson = new Gson();
+                 String json = gson.toJson(student);
+                 writer.write(json + "\n");
+            }
+            writer.flush();
+            writer.close();
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public static void initializeStudents() {
+        try {
+            Scanner scanner = new Scanner(new File("../simpleExams/src/com/groep1e/students.txt"));
+            Gson gson = new Gson();
+
+            while (scanner.hasNextLine()) {
+                Student.addStudent(gson.fromJson(scanner.nextLine(), Student.class));
+            }
+
+        } catch (Exception e) {
+            System.out.println(e);
         }
     }
 

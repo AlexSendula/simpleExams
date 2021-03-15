@@ -6,7 +6,7 @@ public class Student {
     private String name;
     private String studentId;
     private static ArrayList<Student> studentList = new ArrayList<>();
-    private ArrayList<Exam> completedExams = new ArrayList<>();
+    private ArrayList<String> completedExams = new ArrayList<>();
 
     public Student(String naam, String studentNummer) {
         this.name = naam;
@@ -52,11 +52,11 @@ public class Student {
 
     public void addCompletedExam(Exam exam) {
         if (!completedExams.contains(exam)) {
-            completedExams.add(exam);
+            completedExams.add(exam.getNameShort());
         }
     }
 
-    public ArrayList<Exam> getCompletedExams() {
+    public ArrayList<String> getCompletedExams() {
         return completedExams;
     }
 

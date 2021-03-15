@@ -1,0 +1,3 @@
+{"name":"Alex","studentId":"12345678","completedExams":["Math"]}
+{"name":"Dylan","studentId":"23456789","completedExams":[]}
+{"name":"Emre","studentId":"34567891","completedExams":[]}
