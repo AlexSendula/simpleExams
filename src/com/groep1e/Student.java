@@ -56,33 +56,20 @@ public class Student {
         }
     }
 
+    public void removeCompletedExam(Exam exam) {
+        this.completedExams.remove(exam);
+    }
+
     public ArrayList<String> getCompletedExams() {
         return completedExams;
     }
 
-    public static boolean isStudentIdValid(String studentId, boolean mustExist) {
-//        Boolean mustExist: TRUE -> finds if studentId exists
-//        Boolean mustExist: FALSE -> finds if studentId does not exist
-
+    public static boolean isStudentIdValid(String studentId) {
         if (studentId.length() != 8) {
             return false;
         }
 
-        if (mustExist) {
-            for (Student student : studentList) {
-                if (student.studentId.equals(studentId)) {
-                    return true;
-                }
-            }
-        } else {
-            for (Student student : studentList) {
-                if (student.studentId.equals(studentId)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+        return studentList.contains(Student.getStudentById(studentId));
     }
 
     public static Student getTopScoringStudent() {

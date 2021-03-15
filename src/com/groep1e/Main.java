@@ -17,10 +17,10 @@ public class Main {
         initializeStudents();
         initializeExams();
 
-        MenuData();
+        menuData();
     }
 
-    public static void MenuData() {
+    public static void menuData() {
 
         System.out.printf("\n");
         System.out.println("1) List of exams");
@@ -42,7 +42,7 @@ public class Main {
             selection = scanner.nextInt();
         } catch (Exception e) {
             clearScrean();
-            MenuData();
+            menuData();
             return;
         }
 
@@ -91,7 +91,7 @@ public class Main {
             }
         } else {
             clearScrean();
-            MenuData();
+            menuData();
         }
     }
 
@@ -106,7 +106,7 @@ public class Main {
             System.out.println(exam.getNameShort());
         }
 
-        MenuData();
+        menuData();
     }
 
     public static void createStudent() {
@@ -115,16 +115,20 @@ public class Main {
         System.out.println("Name, StudentId");
         String[] input = scanner.nextLine().split(", ");
 
-        if (Student.isStudentIdValid(input[1], false)) {
-            Student student = new Student(input[0], input[1]);
+        try {
+            if (!Student.isStudentIdValid(input[1])) {
+                Student student = new Student(input[0], input[1]);
 
-            Student.addStudent(student);
-            System.out.printf("Student %s has been created.\n", student.getName());
-        } else {
-            System.out.println("Invalid student id, please try again.");
+                Student.addStudent(student);
+                System.out.printf("Student %s has been created.\n", student.getName());
+            } else {
+                System.out.println("Invalid student id, please try again.");
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid entry, please try again.");
         }
 
-        MenuData();
+        menuData();
     }
 
     public static void listStudents() {
@@ -132,17 +136,30 @@ public class Main {
             System.out.printf("%s, %s\n", student.getName(), student.getStudentNummer());
         }
 
-        MenuData();
+        menuData();
     }
 
     public static void removeStudent() {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Please provide a valid student id.");
-        Student.removeStudent(scanner.nextLine());
-        System.out.println("Student has been deleted.");
+        String studentId = scanner.nextLine();
+        if (!Student.isStudentIdValid(studentId)) {
+            clearScrean();
+            System.out.println("Invalid student id, please try again.");
+            menuData();
+        }
 
-        MenuData();
+        System.out.println("Please confirm: y/n");
+        if (scanner.nextLine().equals("y")) {
+            Student.removeStudent(studentId);
+            clearScrean();
+            System.out.println("Student has been deleted.");
+            menuData();
+        } else {
+            clearScrean();
+            menuData();
+        }
     }
 
     public static void takeExam()  {
@@ -151,11 +168,11 @@ public class Main {
         String studentId = scanner.nextLine();
         Student student;
 
-        if (Student.isStudentIdValid(studentId, true)) {
+        if (Student.isStudentIdValid(studentId)) {
             student = Student.getStudentById(studentId);
         } else {
             System.out.println("Invalid student id, please try again.");
-            MenuData();
+            menuData();
             return;
         }
 
@@ -197,13 +214,20 @@ public class Main {
             clearScrean();
             System.out.println("Invalid exam, please try again.");
         }
-        MenuData();
+        menuData();
     }
 
     public static void studentCompletedExams() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Please provide a valid student id.");
-        Student student = Student.getStudentById(scanner.nextLine());
+        String studentId = scanner.nextLine();
+        if (!Student.isStudentIdValid(studentId)) {
+            clearScrean();
+            menuData();
+            return;
+        }
+
+        Student student = Student.getStudentById(studentId);
         clearScrean();
 
         if (student.getCompletedExams().size() == 0) {
@@ -214,7 +238,7 @@ public class Main {
                 System.out.println(exam);
             }
         }
-        MenuData();
+        menuData();
     }
 
     public static void topScoringStudent() {
@@ -225,7 +249,7 @@ public class Main {
         } else {
             System.out.printf("%s has completed most exams. Number of exams completed: %s\n", student.getName(), student.getCompletedExams().size());
         }
-        MenuData();
+        menuData();
     }
 
     public static void  createExams() {
@@ -234,26 +258,31 @@ public class Main {
         String examName = scanner.nextLine() + ".txt";
         System.out.println("Please confirm.");
         if (!examName.equals(scanner.nextLine() + ".txt")) {
-            MenuData();
+            clearScrean();
+            System.out.println("Names do not match, please try again.");
+            menuData();
             return;
         }
 
         File file = new File(examPath + examName);
         try {
-            if (!file.createNewFile()) {
-                System.out.println("This exam already exists, please try again.");
+            if (file.exists()) {
                 clearScrean();
-                MenuData();
+                System.out.println("This exam already exists, please try again.");
+                menuData();
             }
 
-            FileWriter writer = new FileWriter(examPath + examName);
-
             System.out.println("What is the difficulty? (e.g. 62.5)");
-            String difficulty = scanner.nextLine();
-            writer.write(difficulty + ",");
+            Double difficultyDouble = scanner.nextDouble();
+            String difficulty = Double.toString(difficultyDouble);
             System.out.println("How many questions will the exam have?");
-            String examLength = scanner.nextLine();
+            int examLengthInt = scanner.nextInt();
+            String examLength = Integer.toString(examLengthInt);
+
+            FileWriter writer = new FileWriter(examPath + examName);
+            writer.write(difficulty + ",");
             writer.write(examLength + ",");
+            scanner.nextLine();
 
             Question.resetQuestonList();
 
@@ -274,11 +303,12 @@ public class Main {
             writer.close();
             clearScrean();
             System.out.println("Exam succesfully created!");
-            MenuData();
+            menuData();
         } catch (Exception e) {
+
             clearScrean();
-            System.out.println(e);
-            MenuData();
+            System.out.println("Invalid entry, please try again.");
+            menuData();
         }
     }
 
@@ -293,34 +323,44 @@ public class Main {
         if (Exam.getExam(examName + ".txt") == null) {
             clearScrean();
             System.out.println("Exam does not exist, please try again.");
-            MenuData();
-            return;
+            menuData();
         }
+        System.out.println("Please confirm. y/n");
+        if (scanner.nextLine().equals("y")) {
+            Exam exam = Exam.getExam(examName + ".txt");
 
-        Exam exam = Exam.getExam(examName + ".txt");
+            try {
+                System.gc();
+                if (Files.deleteIfExists(Paths.get(examPath + examName + ".txt"))) {
+                    Exam.removeExam(exam);
 
-        try {
-            System.gc();
-            if (Files.deleteIfExists(Paths.get("../simpleExams/src/com/groep1e//Exams/test.txt"))) {
+                    for (Student student : Student.getStudentList()) {
+                        if (student.getCompletedExams().contains(exam)) {
+                            student.removeCompletedExam(exam);
+                        }
+                    }
+                    storeStudents();
+                    clearScrean();
+                    System.out.printf("%s has been deleted", examName);
+                    menuData();
+                } else {
+                    clearScrean();
+                    System.out.println("error");
+                    menuData();
+                }
+            } catch (Exception e) {
+                System.out.println("Error, please try again.");
                 clearScrean();
-                System.out.printf("%s has been deleted", examName);
-                MenuData();
-            } else {
-                clearScrean();
-                System.out.println("error");
-                MenuData();
+                menuData();
             }
-        } catch (Exception e) {
-            System.out.println(e);
-            clearScrean();
-            MenuData();
         }
     }
 
     public static void storeStudents() {
         try {
             File file = new File("../simpleExams/src/com/groep1e/students.txt");
-            if (!file.delete() && !file.createNewFile()) {
+            System.gc();
+            if (Files.deleteIfExists(Paths.get(file.getAbsolutePath())) && !file.createNewFile()) {
                 System.out.println("ERROR: Data could not be stored.");
             }
 
@@ -358,14 +398,22 @@ public class Main {
             File folder = new File(examPath);
             for (File f : folder.listFiles()) {
                 Scanner scanner = new Scanner(new File(examPath + f.getName()));
-                scanner.useDelimiter(",");
-                String difficulty = scanner.next();
-                String examLength = scanner.next();
+                if (scanner.hasNext()) {
+                    scanner.useDelimiter(",");
+                    String difficulty = scanner.next();
+                    String examLength = scanner.next();
 
-                Exam.addExam(new Exam(f.getName(), difficulty, examLength, initializeQuestions(f.getName())));
+                    Exam.addExam(new Exam(f.getName(), difficulty, examLength, initializeQuestions(f.getName())));
+                } else {
+                    f.deleteOnExit();
+                }
+
             }
         } catch (Exception e) {
+            clearScrean();
             System.out.println(e);
+            System.out.println("Failed to initialize exams. Closing program.");
+            closeApplication();
         }
     }
 

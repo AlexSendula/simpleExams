@@ -39,6 +39,10 @@ public class Exam {
 
     }
 
+    public static void removeExam(Exam exam) {
+        examList.remove(exam);
+    }
+
     public static List<Question> getShuffledExam(Exam exam) {
         Exam selectedExam = getExam(exam.name);
         int examLength = Integer.parseInt(selectedExam.examLength);
