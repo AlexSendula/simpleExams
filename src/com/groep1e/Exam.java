@@ -17,20 +17,12 @@ public class Exam {
 
     }
 
-    public String getName() {
-        return name;
-    }
-
     public  String getNameShort() {
         return name.substring(0, name.length() -4);
     }
 
     public String getDifficulty() {
         return difficulty;
-    }
-
-    public ArrayList<Question> getQuestionList() {
-        return questionList;
     }
 
     public static ArrayList<Exam> getExamList() {
